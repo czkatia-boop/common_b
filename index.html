@@ -35,8 +35,8 @@
   --tag: var(--overlay-2);
   --impulse: var(--overlay-2);
   --impulse-strong: var(--overlay-3);
-  --radius: 12px;
-  --radius-lg: 16px;
+  --radius: 0;
+  --radius-lg: 0;
 }
 
 * {
@@ -48,6 +48,7 @@
 
 html, body {
   overscroll-behavior: none;
+  overflow-x: hidden;
 }
 
 html {
@@ -102,11 +103,11 @@ input::placeholder {
 
 .sync-btn {
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--ink);
-  background: rgba(35, 32, 27,0.1);
-  border: none;
-  border-radius: 8px;
+  background: transparent;
+  border: 1px dashed var(--border-default);
+  border-radius: 0;
   padding: 5px 12px;
   cursor: pointer;
   font-family: inherit;
@@ -121,7 +122,7 @@ input::placeholder {
   font-weight: 600;
   color: var(--ink-soft);
   background: rgba(35, 32, 27,0.1);
-  border-radius: 4px;
+  border-radius: 0;
   padding: 1px 5px;
   margin-left: 4px;
   vertical-align: middle;
@@ -135,6 +136,7 @@ input::placeholder {
   position: relative;
   padding-bottom: env(safe-area-inset-bottom);
   background: transparent;
+  overflow-x: hidden;
 }
 
 .screen {
@@ -273,33 +275,26 @@ input::placeholder {
 
 .segmented {
   display: flex;
-  gap: 24px;
-  border-bottom: 1px dashed var(--border-default);
-  margin-left: -24px;
-  margin-right: -24px;
-  width: calc(100% + 48px);
-  padding: 0 24px;
+  gap: 8px;
   margin-bottom: 24px;
 }
 
 .segmented button {
   background: transparent;
-  border: none;
-  border-bottom: 2px solid transparent;
-  padding: 10px 0 12px;
-  margin-bottom: -1px;
+  border: 1px dashed var(--border-default);
+  padding: 8px 20px;
   font-weight: 700;
   letter-spacing: 0.5px;
   text-transform: uppercase;
   font-size: 13px;
   color: var(--ink-soft);
-  transition: color 0.15s;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
 }
 
 .segmented button.active {
-  background: transparent;
+  background: var(--card-strong);
   color: var(--ink);
-  border-bottom-color: var(--ink);
+  border: 1.5px dashed var(--ink);
 }
 
 /* ============ LISTS — DAY/WEEK/MONTH ============ */
@@ -356,7 +351,6 @@ input::placeholder {
   font-size: 15px;
   font-weight: 700;
   background: transparent;
-  border-top: 1px dashed var(--border-default);
   border-bottom: 1px dashed var(--border-default);
   margin-left: -24px;
   margin-right: -24px;
@@ -442,7 +436,7 @@ input::placeholder {
 
 .tag {
   background: transparent;
-  border: 1px solid var(--border-default);
+  border: 1px dashed var(--border-default);
   padding: 1px 8px;
   border-radius: var(--radius);
   font-size: 11px;
@@ -482,7 +476,7 @@ input::placeholder {
 
 .expense-card .amount-impulse-badge {
   background: var(--impulse);
-  border-radius: 16px;
+  border-radius: 0;
   padding: 1px 8px;
   font-size: 10px;
   color: var(--ink);
@@ -652,29 +646,26 @@ input::placeholder {
 
 .tabs {
   display: flex;
-  margin-left: -24px;
-  margin-right: -24px;
-  width: calc(100% + 48px);
-  padding: 0 24px;
+  gap: 8px;
   margin-bottom: 16px;
-  border-bottom: 1px dashed var(--border-default);
 }
 
 .tabs button {
   flex: 1;
-  padding: 10px;
+  padding: 8px 10px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   font-size: 13px;
   color: var(--ink-soft);
-  border-bottom: 2px solid transparent;
-  margin-bottom: -1px;
+  background: transparent;
+  border: 1px dashed var(--border-default);
 }
 
 .tabs button.active {
   color: var(--ink);
-  border-bottom-color: var(--ink);
+  background: var(--card-strong);
+  border: 1.5px dashed var(--ink);
 }
 
 .source-filter {
@@ -693,11 +684,11 @@ input::placeholder {
 
 .source-filter button {
   background: transparent;
-  border: 1px solid var(--border-default);
+  border: 1px dashed var(--border-default);
   padding: 6px 14px;
   border-radius: var(--radius);
   font-size: 13px;
-  color: var(--ink);
+  color: var(--ink-soft);
   white-space: nowrap;
   font-weight: 700;
   text-transform: uppercase;
@@ -705,8 +696,10 @@ input::placeholder {
 }
 
 .source-filter button.active {
-  background: var(--ink);
-  color: white;
+  background: var(--card-strong);
+  color: var(--ink);
+  border-color: var(--ink);
+  border-width: 1.5px;
 }
 
 .donut-wrap {
@@ -769,14 +762,14 @@ input::placeholder {
 .impulse-progress .bar {
   height: 8px;
   background: rgba(255, 255, 255, 0.5);
-  border-radius: 999px;
+  border-radius: 0;
   overflow: hidden;
 }
 
 .impulse-progress .fill {
   height: 100%;
   background: var(--ink);
-  border-radius: 999px;
+  border-radius: 0;
   transition: width 0.3s;
 }
 
@@ -883,7 +876,7 @@ input::placeholder {
 
 .input-wrap {
   background: var(--card);
-  border: 1px solid var(--border-default);
+  border: 1px dashed var(--border-default);
   border-radius: var(--radius);
   padding: 16px 20px;
   display: flex;
@@ -954,7 +947,7 @@ input::placeholder {
   gap: 8px;
   font-size: 15px;
   color: var(--ink);
-  border: 1px solid var(--border-default);
+  border: 1px dashed var(--border-default);
   transition: all 0.15s;
 }
 
@@ -988,7 +981,7 @@ input::placeholder {
 
 .sub-chip-container {
   background: var(--card-soft);
-  border: 1px solid var(--border-default);
+  border: 1px dashed var(--border-default);
   border-radius: var(--radius-lg);
   padding: 8px;
   margin-top: 8px;
@@ -1024,7 +1017,7 @@ input::placeholder {
   text-align: center;
   font-size: 15px;
   color: var(--ink);
-  border: 1px solid var(--border-default);
+  border: 1px dashed var(--border-default);
   transition: all 0.15s;
   display: flex;
   align-items: center;
@@ -1041,11 +1034,12 @@ input::placeholder {
 
 .radio-option {
   background: var(--card);
-  border: 1px solid var(--border-default);
+  border: 1px dashed var(--border-default);
   padding: 11px 16px;
   border-radius: var(--radius);
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   font-size: 15px;
   color: var(--ink);
@@ -1055,23 +1049,6 @@ input::placeholder {
   border-color: var(--ink);
   border-width: 1.5px;
   font-weight: 700;
-}
-
-.radio-mark {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  border: 1.5px solid var(--ink);
-  flex-shrink: 0;
-  position: relative;
-}
-
-.radio-option.selected .radio-mark::after {
-  content: '';
-  position: absolute;
-  inset: 3px;
-  border-radius: 50%;
-  background: var(--ink);
 }
 
 /* Action buttons */
@@ -1089,20 +1066,21 @@ input::placeholder {
 }
 
 .btn-primary {
-  background: var(--ink);
-  color: var(--bg-end);
+  background: var(--card-strong);
+  color: var(--ink);
+  border: 1.5px dashed var(--ink);
 }
 
 .btn-secondary {
   background: transparent;
   color: var(--ink);
-  border: 1px dashed var(--ink);
+  border: 1px dashed var(--border-default);
 }
 
 .btn-danger {
   background: transparent;
   color: var(--ink);
-  border: 1px dashed var(--ink);
+  border: 1px dashed var(--border-default);
   text-decoration: underline;
   text-decoration-style: wavy;
 }
@@ -1126,7 +1104,7 @@ input::placeholder {
   font-size: 14px;
   background: transparent;
   color: var(--ink);
-  border: 1px solid var(--ink);
+  border: 1px dashed var(--border-default);
 }
 
 /* ============ SETTINGS ============ */
@@ -1166,18 +1144,19 @@ input::placeholder {
   display: flex;
   align-items: center;
   gap: 16px;
-  border: 1px solid transparent;
+  border: 1px dashed var(--border-default);
 }
 
 .selection-card.checked {
   background: rgba(255, 255, 255, 0.9);
   border-color: var(--ink);
+  border-width: 1.5px;
 }
 
 .checkbox {
   width: 20px;
   height: 20px;
-  border-radius: 4px;
+  border-radius: 0;
   border: 1.5px solid var(--ink);
   flex-shrink: 0;
   display: flex;
@@ -1254,7 +1233,7 @@ input::placeholder {
 
 .source-row.editing {
   background: rgba(255, 255, 255, 0.9);
-  border: 1px solid var(--ink);
+  border: 1.5px dashed var(--ink);
 }
 
 /* Edit category screen rows */
@@ -1355,7 +1334,7 @@ input::placeholder {
   font-size: 11px;
   background: rgba(35, 32, 27, 0.08);
   padding: 2px 8px;
-  border-radius: 10px;
+  border-radius: 0;
   color: var(--ink-soft);
   margin-left: 6px;
 }
@@ -1393,6 +1372,7 @@ input::placeholder {
   background: var(--bg-end);
   clip-path: polygon(0.0% 0%, 6.25% 10px, 12.5% 0%, 18.75% 10px, 25.0% 0%, 31.25% 10px, 37.5% 0%, 43.75% 10px, 50.0% 0%, 56.25% 10px, 62.5% 0%, 68.75% 10px, 75.0% 0%, 81.25% 10px, 87.5% 0%, 93.75% 10px, 100.0% 0%, 100% 100%, 0% 100%);
   max-height: 90vh;
+  overflow-x: hidden;
   overflow-y: auto;
   padding: 26px 24px calc(24px + env(safe-area-inset-bottom));
   transform: translateY(100%);
@@ -1415,6 +1395,7 @@ input::placeholder {
   width: calc(100% + 48px);
   padding: 0 24px 16px;
   margin-bottom: 16px;
+  position: relative;
 }
 
 .sheet-header-centered {
@@ -1426,30 +1407,64 @@ input::placeholder {
   text-align: center;
 }
 
+.close-btn {
+  position: absolute;
+  right: 24px;
+  top: 0;
+  bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  color: var(--ink);
+}
+
+.close-btn svg {
+  width: 22px;
+  height: 22px;
+}
+
+.upload-btn {
+  position: absolute;
+  left: 24px;
+  top: 0;
+  bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  color: var(--ink);
+}
+
+.upload-btn svg {
+  width: 22px;
+  height: 22px;
+}
+
 .sheet-tabs {
   display: flex;
-  gap: 24px;
-  border-bottom: 1px dashed var(--border-default);
-  margin-left: -24px;
-  margin-right: -24px;
-  width: calc(100% + 48px);
-  padding: 0 24px;
+  gap: 8px;
   margin-top: -4px;
   margin-bottom: 24px;
 }
 
 .sheet-tab {
-  padding: 10px 0 12px;
-  font-size: 15px;
+  padding: 8px 20px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
   color: var(--ink-soft);
-  border-bottom: 2px solid transparent;
-  margin-bottom: -1px;
+  background: transparent;
+  border: 1px dashed var(--border-default);
+  border-radius: var(--radius);
 }
 
 .sheet-tab.active {
   color: var(--ink);
   font-weight: 700;
-  border-bottom-color: var(--ink);
+  background: var(--card-strong);
+  border: 1.5px dashed var(--ink);
 }
 
 /* ============ MODAL ============ */
@@ -1486,6 +1501,7 @@ input::placeholder {
   padding: 26px 24px 24px;
   animation: slideUp 0.25s ease-out;
   max-height: 90vh;
+  overflow-x: hidden;
   overflow-y: auto;
 }
 
@@ -1688,7 +1704,14 @@ input[type=number] {
   <div class="sheet-backdrop" id="expense-sheet-backdrop" onclick="closeExpenseSheetIfBackdrop(event)"></div>
   <div class="screen expense-sheet" id="screen-expense">
     <div class="screen-header sheet-header-centered">
+      <button class="upload-btn" id="upload-expenses-btn" onclick="document.getElementById('upload-expenses-file').click()" aria-label="Upload expenses">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></svg>
+      </button>
       <h1 class="h1" id="expense-title">Add</h1>
+      <button class="close-btn" onclick="closeExpenseSheet()" aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+      <input type="file" id="upload-expenses-file" accept=".csv,.txt" style="display:none" onchange="importUploadedExpenses(event)">
     </div>
 
     <div class="sheet-tabs" id="sheet-tabs">
@@ -1715,7 +1738,7 @@ input[type=number] {
         <div class="input-wrap sm date-picker-wrap">
           <input type="date" id="expense-date">
           <span class="cal-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="0"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
           </span>
         </div>
       </div>
@@ -1729,11 +1752,9 @@ input[type=number] {
         <label class="field-label sm">Intention</label>
         <div class="row-3">
           <button class="radio-option" data-intention="intentional" onclick="selectIntention('intentional')">
-            <span class="radio-mark"></span>
             <span>🌱 Intentional</span>
           </button>
           <button class="radio-option" data-intention="impulse" onclick="selectIntention('impulse')">
-            <span class="radio-mark"></span>
             <span>⚡ Impulse</span>
           </button>
         </div>
@@ -1761,7 +1782,7 @@ input[type=number] {
         <div class="input-wrap sm date-picker-wrap">
           <input type="date" id="income-date">
           <span class="cal-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="0"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
           </span>
         </div>
       </div>
@@ -2509,55 +2530,6 @@ function currentBalance(today = new Date()) {
   return Math.max(0, income - bills - spentThisCycleOwn);
 }
 
-// ============ BILL AUTO-LOGGING ============
-
-function autoLogBills() {
-  const today = new Date();
-  const cycle = getCurrentCycle(today);
-  const ckey = cycleKey(cycle);
-  let changed = false;
-
-  for (const bill of state.bills) {
-    // Determine the due date for this cycle: it's the bill's dueDay within the cycle range
-    // Clamp dueDay to the actual last day of the month (handles short months gracefully)
-    function clampedDue(year, month, day) {
-      const lastDay = new Date(year, month + 1, 0).getDate();
-      return new Date(year, month, Math.min(day, lastDay));
-    }
-    let due = clampedDue(cycle.start.getFullYear(), cycle.start.getMonth(), bill.dueDay);
-    // If the due date falls before cycle start, push to next month
-    if (due < cycle.start) {
-      due = clampedDue(due.getFullYear(), due.getMonth() + 1, bill.dueDay);
-    }
-    if (due > cycle.end) continue; // bill doesn't fall in this cycle
-
-    // Has this bill been auto-checked for this cycle?
-    if (bill.checkedCycles[ckey]) continue;
-
-    // If today >= due date, auto-check
-    if (startOfDay(today) >= startOfDay(due)) {
-      bill.checkedCycles[ckey] = { date: toISO(due), auto: true, checked: true };
-      // Create an expense entry
-      const expense = {
-        id: uid('e'),
-        amount: bill.amount,
-        sourceId: bill.sourceId,
-        categoryId: 'c-bills',
-        subcategoryId: bill.subcategoryId || null,
-        intention: 'intentional',
-        impulseAmount: null,
-        date: toISO(due),
-        note: bill.name,
-        billId: bill.id,
-        cycleKey: ckey,
-      };
-      state.expenses.push(expense);
-      changed = true;
-    }
-  }
-  if (changed) saveState();
-}
-
 // Toggle a bill manually (check/uncheck for this cycle)
 function toggleBill(billId) {
   const bill = state.bills.find(b => b.id === billId);
@@ -2569,8 +2541,7 @@ function toggleBill(billId) {
   const isChecked = !!(bill.checkedCycles[ckey] && bill.checkedCycles[ckey].checked);
 
   if (isChecked) {
-    // Uncheck: remove the expense, and record an explicit "dismissed" marker
-    // for this cycle so autoLogBills() doesn't silently re-add it later.
+    // Uncheck: remove the expense.
     state.expenses = state.expenses.filter(e => !(e.billId === bill.id && e.cycleKey === ckey));
     bill.checkedCycles[ckey] = { date: null, auto: false, checked: false };
   } else {
@@ -2674,6 +2645,7 @@ function navigateHome() {
 function openAddExpense() {
   editingExpenseId = null;
   document.getElementById('sheet-tabs').style.display = 'flex';
+  document.getElementById('upload-expenses-btn').style.display = 'flex';
   document.getElementById('expense-title').textContent = 'Add';
   document.getElementById('expense-save').textContent = 'Add';
   document.getElementById('expense-delete').style.display = 'none';
@@ -2682,18 +2654,22 @@ function openAddExpense() {
   document.getElementById('expense-impulse-amount').value = '';
   document.getElementById('expense-impulse-sub').style.display = 'none';
 
-  // Default: first category, first source, intentional
+  // Default to whatever category/source/subcategory was used last, falling back
+  // to the first of each when there's no history yet.
+  const lastExpense = state.expenses[state.expenses.length - 1];
   selectedExpense = {
-    categoryId: state.categories[0]?.id || null,
-    subcategoryId: null,
-    sourceId: state.sources[0]?.id || null,
+    categoryId: lastExpense?.categoryId || state.categories[0]?.id || null,
+    subcategoryId: lastExpense?.subcategoryId || null,
+    sourceId: lastExpense?.sourceId || state.sources[0]?.id || null,
     intention: 'intentional',
   };
-  expandedCategoryInForm = null;
-  showAllCategoriesInForm = false;
+  expandedCategoryInForm = selectedExpense.subcategoryId ? selectedExpense.categoryId : null;
+  const lastCatIdx = state.categories.findIndex(c => c.id === selectedExpense.categoryId);
+  showAllCategoriesInForm = lastCatIdx >= 5;
 
-  // Income tab defaults
-  selectedIncome = { sourceId: state.sources[0]?.id || null };
+  // Income tab defaults — same idea, remembers the last destination used
+  const lastIncome = state.income[state.income.length - 1];
+  selectedIncome = { sourceId: lastIncome?.sourceId || state.sources[0]?.id || null };
   document.getElementById('income-amount').value = '';
   document.getElementById('income-date').value = todayISO();
 
@@ -2701,6 +2677,9 @@ function openAddExpense() {
   renderExpenseForm();
   renderIncomeForm();
   openExpenseSheet();
+  // Autofocus the amount field once the sheet has finished sliding up, so
+  // typing the number is the very next action instead of an extra tap.
+  setTimeout(() => document.getElementById('expense-amount').focus(), 300);
 }
 
 function openEditExpense(id) {
@@ -2709,6 +2688,7 @@ function openEditExpense(id) {
   editingExpenseId = id;
   sheetTab = 'expense';
   document.getElementById('sheet-tabs').style.display = 'none';
+  document.getElementById('upload-expenses-btn').style.display = 'none';
   document.getElementById('expense-tab-expense').style.display = 'block';
   document.getElementById('expense-tab-income').style.display = 'none';
   document.getElementById('expense-title').textContent = 'Edit';
@@ -2965,6 +2945,83 @@ function saveExpense() {
   saveState();
   renderAll();
   closeExpenseSheet();
+}
+
+// ============ BULK EXPENSE UPLOAD ============
+// Adds expenses from a CSV/txt file instead of replacing existing data (unlike
+// Settings > Import data, which restores a full backup). Expected columns per
+// row: date,amount,note,source — date as DD.MM.YYYY or YYYY-MM-DD, amount a
+// plain positive number, source matched by name against your existing sources
+// (falls back to the first source if missing or unmatched). Category defaults
+// to "Other" — expected to be reassigned by hand afterward.
+
+function parseCsvLine(line) {
+  const out = [];
+  let cur = '';
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (inQuotes) {
+      if (c === '"' && line[i + 1] === '"') { cur += '"'; i++; }
+      else if (c === '"') { inQuotes = false; }
+      else { cur += c; }
+    } else {
+      if (c === '"') inQuotes = true;
+      else if (c === ',') { out.push(cur); cur = ''; }
+      else cur += c;
+    }
+  }
+  out.push(cur);
+  return out.map(s => s.trim());
+}
+
+function parseBankDate(raw) {
+  const s = (raw || '').trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+  const m = s.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
+  if (m) return `${m[3]}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}`;
+  return null;
+}
+
+function importUploadedExpenses(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const lines = e.target.result.split(/\r?\n/).filter(l => l.trim() !== '');
+    let added = 0;
+    let skipped = 0;
+    lines.forEach(line => {
+      const cols = parseCsvLine(line);
+      if (cols[0] && cols[0].toLowerCase() === 'date') return; // allow a header row
+      const [dateRaw, amountRaw, note, sourceName] = cols;
+      const date = parseBankDate(dateRaw);
+      const amount = parseAmount(amountRaw);
+      if (!date || isNaN(amount) || amount <= 0) { skipped++; return; }
+      let sourceId = state.sources[0]?.id || null;
+      if (sourceName) {
+        const match = state.sources.find(s => s.name.toLowerCase() === sourceName.trim().toLowerCase());
+        if (match) sourceId = match.id;
+      }
+      state.expenses.push({
+        id: uid('e'),
+        amount,
+        date,
+        categoryId: 'c-other',
+        subcategoryId: null,
+        sourceId,
+        intention: 'intentional',
+        impulseAmount: null,
+        note: note || '',
+      });
+      added++;
+    });
+    if (added > 0) { saveState(); renderAll(); }
+    toast(skipped > 0 ? `Imported ${added}, skipped ${skipped}` : `Imported ${added} expense${added === 1 ? '' : 's'}`);
+    if (added > 0) closeExpenseSheet();
+  };
+  reader.readAsText(file);
+  event.target.value = '';
 }
 
 function deleteExpense() {
@@ -4216,7 +4273,6 @@ function toast(msg) {
 // ============ MASTER RENDER ============
 
 function renderAll() {
-  autoLogBills();
   if (currentScreen === 'home') renderHome();
   else if (currentScreen === 'settings') renderSettings();
   else if (currentScreen === 'bills') renderBills();
@@ -4229,7 +4285,6 @@ function renderAll() {
 
 loadState();
 loadPartnerState();
-autoLogBills();
 renderAll();
 // Pull partner data on startup (silent)
 pullPartnerData().then(ok => { if (ok) renderAll(); });
