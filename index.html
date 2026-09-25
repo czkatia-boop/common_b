@@ -2487,55 +2487,6 @@ function currentBalance(today = new Date()) {
   return Math.max(0, income - bills - spentThisCycleOwn);
 }
 
-// ============ BILL AUTO-LOGGING ============
-
-function autoLogBills() {
-  const today = new Date();
-  const cycle = getCurrentCycle(today);
-  const ckey = cycleKey(cycle);
-  let changed = false;
-
-  for (const bill of state.bills) {
-    // Determine the due date for this cycle: it's the bill's dueDay within the cycle range
-    // Clamp dueDay to the actual last day of the month (handles short months gracefully)
-    function clampedDue(year, month, day) {
-      const lastDay = new Date(year, month + 1, 0).getDate();
-      return new Date(year, month, Math.min(day, lastDay));
-    }
-    let due = clampedDue(cycle.start.getFullYear(), cycle.start.getMonth(), bill.dueDay);
-    // If the due date falls before cycle start, push to next month
-    if (due < cycle.start) {
-      due = clampedDue(due.getFullYear(), due.getMonth() + 1, bill.dueDay);
-    }
-    if (due > cycle.end) continue; // bill doesn't fall in this cycle
-
-    // Has this bill been auto-checked for this cycle?
-    if (bill.checkedCycles[ckey]) continue;
-
-    // If today >= due date, auto-check
-    if (startOfDay(today) >= startOfDay(due)) {
-      bill.checkedCycles[ckey] = { date: toISO(due), auto: true, checked: true };
-      // Create an expense entry
-      const expense = {
-        id: uid('e'),
-        amount: bill.amount,
-        sourceId: bill.sourceId,
-        categoryId: 'c-bills',
-        subcategoryId: bill.subcategoryId || null,
-        intention: 'intentional',
-        impulseAmount: null,
-        date: toISO(due),
-        note: bill.name,
-        billId: bill.id,
-        cycleKey: ckey,
-      };
-      state.expenses.push(expense);
-      changed = true;
-    }
-  }
-  if (changed) saveState();
-}
-
 // Toggle a bill manually (check/uncheck for this cycle)
 function toggleBill(billId) {
   const bill = state.bills.find(b => b.id === billId);
@@ -2547,8 +2498,7 @@ function toggleBill(billId) {
   const isChecked = !!(bill.checkedCycles[ckey] && bill.checkedCycles[ckey].checked);
 
   if (isChecked) {
-    // Uncheck: remove the expense, and record an explicit "dismissed" marker
-    // for this cycle so autoLogBills() doesn't silently re-add it later.
+    // Uncheck: remove the expense.
     state.expenses = state.expenses.filter(e => !(e.billId === bill.id && e.cycleKey === ckey));
     bill.checkedCycles[ckey] = { date: null, auto: false, checked: false };
   } else {
@@ -4194,7 +4144,6 @@ function toast(msg) {
 // ============ MASTER RENDER ============
 
 function renderAll() {
-  autoLogBills();
   if (currentScreen === 'home') renderHome();
   else if (currentScreen === 'settings') renderSettings();
   else if (currentScreen === 'bills') renderBills();
@@ -4207,7 +4156,6 @@ function renderAll() {
 
 loadState();
 loadPartnerState();
-autoLogBills();
 renderAll();
 // Pull partner data on startup (silent)
 pullPartnerData().then(ok => { if (ok) renderAll(); });
