@@ -2632,18 +2632,22 @@ function openAddExpense() {
   document.getElementById('expense-impulse-amount').value = '';
   document.getElementById('expense-impulse-sub').style.display = 'none';
 
-  // Default: first category, first source, intentional
+  // Default to whatever category/source/subcategory was used last, falling back
+  // to the first of each when there's no history yet.
+  const lastExpense = state.expenses[state.expenses.length - 1];
   selectedExpense = {
-    categoryId: state.categories[0]?.id || null,
-    subcategoryId: null,
-    sourceId: state.sources[0]?.id || null,
+    categoryId: lastExpense?.categoryId || state.categories[0]?.id || null,
+    subcategoryId: lastExpense?.subcategoryId || null,
+    sourceId: lastExpense?.sourceId || state.sources[0]?.id || null,
     intention: 'intentional',
   };
-  expandedCategoryInForm = null;
-  showAllCategoriesInForm = false;
+  expandedCategoryInForm = selectedExpense.subcategoryId ? selectedExpense.categoryId : null;
+  const lastCatIdx = state.categories.findIndex(c => c.id === selectedExpense.categoryId);
+  showAllCategoriesInForm = lastCatIdx >= 5;
 
-  // Income tab defaults
-  selectedIncome = { sourceId: state.sources[0]?.id || null };
+  // Income tab defaults — same idea, remembers the last destination used
+  const lastIncome = state.income[state.income.length - 1];
+  selectedIncome = { sourceId: lastIncome?.sourceId || state.sources[0]?.id || null };
   document.getElementById('income-amount').value = '';
   document.getElementById('income-date').value = todayISO();
 
@@ -2651,6 +2655,9 @@ function openAddExpense() {
   renderExpenseForm();
   renderIncomeForm();
   openExpenseSheet();
+  // Autofocus the amount field once the sheet has finished sliding up, so
+  // typing the number is the very next action instead of an extra tap.
+  setTimeout(() => document.getElementById('expense-amount').focus(), 300);
 }
 
 function openEditExpense(id) {
