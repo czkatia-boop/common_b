@@ -2950,10 +2950,12 @@ function saveExpense() {
 // ============ BULK EXPENSE UPLOAD ============
 // Adds expenses from a CSV/txt file instead of replacing existing data (unlike
 // Settings > Import data, which restores a full backup). Expected columns per
-// row: date,amount,note,source — date as DD.MM.YYYY or YYYY-MM-DD, amount a
-// plain positive number, source matched by name against your existing sources
-// (falls back to the first source if missing or unmatched). Category defaults
-// to "Other" — expected to be reassigned by hand afterward.
+// row: date,amount,note,source,category — date as DD.MM.YYYY or YYYY-MM-DD,
+// amount a plain positive number, source and category each matched by name
+// against your existing sources/categories (source falls back to the first
+// source if missing or unmatched; category falls back to "Other" the same
+// way, since it's optional — leave it blank for rows you'd rather assign by
+// hand).
 
 function parseCsvLine(line) {
   const out = [];
@@ -2994,7 +2996,7 @@ function importUploadedExpenses(event) {
     lines.forEach(line => {
       const cols = parseCsvLine(line);
       if (cols[0] && cols[0].toLowerCase() === 'date') return; // allow a header row
-      const [dateRaw, amountRaw, note, sourceName] = cols;
+      const [dateRaw, amountRaw, note, sourceName, categoryName] = cols;
       const date = parseBankDate(dateRaw);
       const amount = parseAmount(amountRaw);
       if (!date || isNaN(amount) || amount <= 0) { skipped++; return; }
@@ -3003,11 +3005,16 @@ function importUploadedExpenses(event) {
         const match = state.sources.find(s => s.name.toLowerCase() === sourceName.trim().toLowerCase());
         if (match) sourceId = match.id;
       }
+      let categoryId = 'c-other';
+      if (categoryName) {
+        const match = state.categories.find(c => c.name.toLowerCase() === categoryName.trim().toLowerCase());
+        if (match) categoryId = match.id;
+      }
       state.expenses.push({
         id: uid('e'),
         amount,
         date,
-        categoryId: 'c-other',
+        categoryId,
         subcategoryId: null,
         sourceId,
         intention: 'intentional',

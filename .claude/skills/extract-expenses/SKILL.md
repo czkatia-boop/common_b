@@ -19,10 +19,10 @@ negotiable — get it wrong and rows silently fail to import.
 Plain comma-separated CSV, one row per expense, optional header row:
 
 ```
-date,amount,note,source
-25.09.2026,135.00,"PANI LUCYNA - przelew na telefon",PKO
-25.09.2026,70.00,"MIKHAIL NULL SIBHATULLIN - przelew IKO",PKO
-23.09.2026,129.88,"ccc.eu Polkowice",PKO
+date,amount,note,source,category
+25.09.2026,135.00,"PANI LUCYNA - przelew na telefon",PKO,
+25.09.2026,45.20,"Biedronka",PKO,Groceries
+23.09.2026,129.88,"ccc.eu Polkowice",PKO,Clothes
 ```
 
 Columns, in this exact order:
@@ -42,9 +42,37 @@ Columns, in this exact order:
   up). If you're not sure what they've named it, ask — an unmatched name
   silently falls back to their first configured source instead of erroring,
   which is worse than asking.
+- **category** — optional. Match it, case-insensitively, against the name of
+  one of the user's existing categories (Settings → Categories). An empty
+  value or an unmatched name both fall back to "Other" — same safe behavior
+  as source, so it's fine to leave this blank on a row you're not confident
+  about instead of guessing wrong silently. See "Guessing the category"
+  below for how to fill this in well.
 
 Deliver the finished CSV as an actual file (not pasted as a code block or
 inline text) — it's meant to be uploaded through the app's own button.
+
+### Guessing the category
+
+Find out the user's actual category list before guessing — either from
+context you already have in the conversation, or by asking them (Settings →
+Categories in the app). Don't assume the defaults are still what they have;
+categories get renamed, merged, and added over time. The stock set this app
+ships with is Groceries, Kids, Transportation, Home stuff, Clothes, Health,
+Fun stuff, Eating out, Bills, Travel, Savings, Selfcare/beauty, Presents, and
+Other — a reasonable starting guess only if the user hasn't told you
+otherwise.
+
+Once you know the real list, match each transaction's merchant/description
+against it. Some are obvious from the name alone (a supermarket chain →
+Groceries, an airline → Travel, a clothing retailer → Clothes). Others
+aren't — a bank transfer to a person, an ATM withdrawal, a generic-sounding
+subscription — and guessing wrong there is worse than not guessing, because
+a wrong category is a bug the user has to notice and fix, while a blank one
+(→ "Other") is an obvious, honest gap they'll expect to fill in themselves.
+When you leave a row's category blank for this reason, don't just do it
+silently: mention it in your summary, the same way you'd flag an excluded
+hold or an illegible row, so the user knows which ones to look at.
 
 ## What to actually extract
 
