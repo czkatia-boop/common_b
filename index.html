@@ -35,8 +35,8 @@
   --tag: var(--overlay-2);
   --impulse: var(--overlay-2);
   --impulse-strong: var(--overlay-3);
-  --radius: 12px;
-  --radius-lg: 16px;
+  --radius: 0;
+  --radius-lg: 0;
 }
 
 * {
@@ -48,6 +48,7 @@
 
 html, body {
   overscroll-behavior: none;
+  overflow-x: hidden;
 }
 
 html {
@@ -102,11 +103,11 @@ input::placeholder {
 
 .sync-btn {
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--ink);
-  background: rgba(35, 32, 27,0.1);
-  border: none;
-  border-radius: 8px;
+  background: transparent;
+  border: 1px dashed var(--border-default);
+  border-radius: 0;
   padding: 5px 12px;
   cursor: pointer;
   font-family: inherit;
@@ -121,7 +122,7 @@ input::placeholder {
   font-weight: 600;
   color: var(--ink-soft);
   background: rgba(35, 32, 27,0.1);
-  border-radius: 4px;
+  border-radius: 0;
   padding: 1px 5px;
   margin-left: 4px;
   vertical-align: middle;
@@ -273,33 +274,26 @@ input::placeholder {
 
 .segmented {
   display: flex;
-  gap: 24px;
-  border-bottom: 1px dashed var(--border-default);
-  margin-left: -24px;
-  margin-right: -24px;
-  width: calc(100% + 48px);
-  padding: 0 24px;
+  gap: 8px;
   margin-bottom: 24px;
 }
 
 .segmented button {
   background: transparent;
-  border: none;
-  border-bottom: 2px solid transparent;
-  padding: 10px 0 12px;
-  margin-bottom: -1px;
+  border: 1px dashed var(--border-default);
+  padding: 8px 20px;
   font-weight: 700;
   letter-spacing: 0.5px;
   text-transform: uppercase;
   font-size: 13px;
   color: var(--ink-soft);
-  transition: color 0.15s;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
 }
 
 .segmented button.active {
-  background: transparent;
+  background: var(--card-strong);
   color: var(--ink);
-  border-bottom-color: var(--ink);
+  border: 1.5px dashed var(--ink);
 }
 
 /* ============ LISTS — DAY/WEEK/MONTH ============ */
@@ -356,7 +350,6 @@ input::placeholder {
   font-size: 15px;
   font-weight: 700;
   background: transparent;
-  border-top: 1px dashed var(--border-default);
   border-bottom: 1px dashed var(--border-default);
   margin-left: -24px;
   margin-right: -24px;
@@ -442,7 +435,7 @@ input::placeholder {
 
 .tag {
   background: transparent;
-  border: 1px solid var(--border-default);
+  border: 1px dashed var(--border-default);
   padding: 1px 8px;
   border-radius: var(--radius);
   font-size: 11px;
@@ -482,7 +475,7 @@ input::placeholder {
 
 .expense-card .amount-impulse-badge {
   background: var(--impulse);
-  border-radius: 16px;
+  border-radius: 0;
   padding: 1px 8px;
   font-size: 10px;
   color: var(--ink);
@@ -652,29 +645,26 @@ input::placeholder {
 
 .tabs {
   display: flex;
-  margin-left: -24px;
-  margin-right: -24px;
-  width: calc(100% + 48px);
-  padding: 0 24px;
+  gap: 8px;
   margin-bottom: 16px;
-  border-bottom: 1px dashed var(--border-default);
 }
 
 .tabs button {
   flex: 1;
-  padding: 10px;
+  padding: 8px 10px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   font-size: 13px;
   color: var(--ink-soft);
-  border-bottom: 2px solid transparent;
-  margin-bottom: -1px;
+  background: transparent;
+  border: 1px dashed var(--border-default);
 }
 
 .tabs button.active {
   color: var(--ink);
-  border-bottom-color: var(--ink);
+  background: var(--card-strong);
+  border: 1.5px dashed var(--ink);
 }
 
 .source-filter {
@@ -693,11 +683,11 @@ input::placeholder {
 
 .source-filter button {
   background: transparent;
-  border: 1px solid var(--border-default);
+  border: 1px dashed var(--border-default);
   padding: 6px 14px;
   border-radius: var(--radius);
   font-size: 13px;
-  color: var(--ink);
+  color: var(--ink-soft);
   white-space: nowrap;
   font-weight: 700;
   text-transform: uppercase;
@@ -705,8 +695,10 @@ input::placeholder {
 }
 
 .source-filter button.active {
-  background: var(--ink);
-  color: white;
+  background: var(--card-strong);
+  color: var(--ink);
+  border-color: var(--ink);
+  border-width: 1.5px;
 }
 
 .donut-wrap {
@@ -769,14 +761,14 @@ input::placeholder {
 .impulse-progress .bar {
   height: 8px;
   background: rgba(255, 255, 255, 0.5);
-  border-radius: 999px;
+  border-radius: 0;
   overflow: hidden;
 }
 
 .impulse-progress .fill {
   height: 100%;
   background: var(--ink);
-  border-radius: 999px;
+  border-radius: 0;
   transition: width 0.3s;
 }
 
@@ -883,7 +875,7 @@ input::placeholder {
 
 .input-wrap {
   background: var(--card);
-  border: 1px solid var(--border-default);
+  border: 1px dashed var(--border-default);
   border-radius: var(--radius);
   padding: 16px 20px;
   display: flex;
@@ -954,7 +946,7 @@ input::placeholder {
   gap: 8px;
   font-size: 15px;
   color: var(--ink);
-  border: 1px solid var(--border-default);
+  border: 1px dashed var(--border-default);
   transition: all 0.15s;
 }
 
@@ -988,7 +980,7 @@ input::placeholder {
 
 .sub-chip-container {
   background: var(--card-soft);
-  border: 1px solid var(--border-default);
+  border: 1px dashed var(--border-default);
   border-radius: var(--radius-lg);
   padding: 8px;
   margin-top: 8px;
@@ -1024,7 +1016,7 @@ input::placeholder {
   text-align: center;
   font-size: 15px;
   color: var(--ink);
-  border: 1px solid var(--border-default);
+  border: 1px dashed var(--border-default);
   transition: all 0.15s;
   display: flex;
   align-items: center;
@@ -1041,11 +1033,12 @@ input::placeholder {
 
 .radio-option {
   background: var(--card);
-  border: 1px solid var(--border-default);
+  border: 1px dashed var(--border-default);
   padding: 11px 16px;
   border-radius: var(--radius);
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   font-size: 15px;
   color: var(--ink);
@@ -1055,23 +1048,6 @@ input::placeholder {
   border-color: var(--ink);
   border-width: 1.5px;
   font-weight: 700;
-}
-
-.radio-mark {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  border: 1.5px solid var(--ink);
-  flex-shrink: 0;
-  position: relative;
-}
-
-.radio-option.selected .radio-mark::after {
-  content: '';
-  position: absolute;
-  inset: 3px;
-  border-radius: 50%;
-  background: var(--ink);
 }
 
 /* Action buttons */
@@ -1089,20 +1065,21 @@ input::placeholder {
 }
 
 .btn-primary {
-  background: var(--ink);
-  color: var(--bg-end);
+  background: var(--card-strong);
+  color: var(--ink);
+  border: 1.5px dashed var(--ink);
 }
 
 .btn-secondary {
   background: transparent;
   color: var(--ink);
-  border: 1px dashed var(--ink);
+  border: 1px dashed var(--border-default);
 }
 
 .btn-danger {
   background: transparent;
   color: var(--ink);
-  border: 1px dashed var(--ink);
+  border: 1px dashed var(--border-default);
   text-decoration: underline;
   text-decoration-style: wavy;
 }
@@ -1126,7 +1103,7 @@ input::placeholder {
   font-size: 14px;
   background: transparent;
   color: var(--ink);
-  border: 1px solid var(--ink);
+  border: 1px dashed var(--border-default);
 }
 
 /* ============ SETTINGS ============ */
@@ -1166,18 +1143,19 @@ input::placeholder {
   display: flex;
   align-items: center;
   gap: 16px;
-  border: 1px solid transparent;
+  border: 1px dashed var(--border-default);
 }
 
 .selection-card.checked {
   background: rgba(255, 255, 255, 0.9);
   border-color: var(--ink);
+  border-width: 1.5px;
 }
 
 .checkbox {
   width: 20px;
   height: 20px;
-  border-radius: 4px;
+  border-radius: 0;
   border: 1.5px solid var(--ink);
   flex-shrink: 0;
   display: flex;
@@ -1254,7 +1232,7 @@ input::placeholder {
 
 .source-row.editing {
   background: rgba(255, 255, 255, 0.9);
-  border: 1px solid var(--ink);
+  border: 1.5px dashed var(--ink);
 }
 
 /* Edit category screen rows */
@@ -1355,7 +1333,7 @@ input::placeholder {
   font-size: 11px;
   background: rgba(35, 32, 27, 0.08);
   padding: 2px 8px;
-  border-radius: 10px;
+  border-radius: 0;
   color: var(--ink-soft);
   margin-left: 6px;
 }
@@ -1393,6 +1371,7 @@ input::placeholder {
   background: var(--bg-end);
   clip-path: polygon(0.0% 0%, 6.25% 10px, 12.5% 0%, 18.75% 10px, 25.0% 0%, 31.25% 10px, 37.5% 0%, 43.75% 10px, 50.0% 0%, 56.25% 10px, 62.5% 0%, 68.75% 10px, 75.0% 0%, 81.25% 10px, 87.5% 0%, 93.75% 10px, 100.0% 0%, 100% 100%, 0% 100%);
   max-height: 90vh;
+  overflow-x: hidden;
   overflow-y: auto;
   padding: 26px 24px calc(24px + env(safe-area-inset-bottom));
   transform: translateY(100%);
@@ -1428,28 +1407,28 @@ input::placeholder {
 
 .sheet-tabs {
   display: flex;
-  gap: 24px;
-  border-bottom: 1px dashed var(--border-default);
-  margin-left: -24px;
-  margin-right: -24px;
-  width: calc(100% + 48px);
-  padding: 0 24px;
+  gap: 8px;
   margin-top: -4px;
   margin-bottom: 24px;
 }
 
 .sheet-tab {
-  padding: 10px 0 12px;
-  font-size: 15px;
+  padding: 8px 20px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
   color: var(--ink-soft);
-  border-bottom: 2px solid transparent;
-  margin-bottom: -1px;
+  background: transparent;
+  border: 1px dashed var(--border-default);
+  border-radius: var(--radius);
 }
 
 .sheet-tab.active {
   color: var(--ink);
   font-weight: 700;
-  border-bottom-color: var(--ink);
+  background: var(--card-strong);
+  border: 1.5px dashed var(--ink);
 }
 
 /* ============ MODAL ============ */
@@ -1486,6 +1465,7 @@ input::placeholder {
   padding: 26px 24px 24px;
   animation: slideUp 0.25s ease-out;
   max-height: 90vh;
+  overflow-x: hidden;
   overflow-y: auto;
 }
 
@@ -1715,7 +1695,7 @@ input[type=number] {
         <div class="input-wrap sm date-picker-wrap">
           <input type="date" id="expense-date">
           <span class="cal-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="0"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
           </span>
         </div>
       </div>
@@ -1729,11 +1709,9 @@ input[type=number] {
         <label class="field-label sm">Intention</label>
         <div class="row-3">
           <button class="radio-option" data-intention="intentional" onclick="selectIntention('intentional')">
-            <span class="radio-mark"></span>
             <span>🌱 Intentional</span>
           </button>
           <button class="radio-option" data-intention="impulse" onclick="selectIntention('impulse')">
-            <span class="radio-mark"></span>
             <span>⚡ Impulse</span>
           </button>
         </div>
@@ -1761,7 +1739,7 @@ input[type=number] {
         <div class="input-wrap sm date-picker-wrap">
           <input type="date" id="income-date">
           <span class="cal-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="0"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
           </span>
         </div>
       </div>
