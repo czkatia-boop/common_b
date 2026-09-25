@@ -1424,6 +1424,23 @@ input::placeholder {
   height: 22px;
 }
 
+.upload-btn {
+  position: absolute;
+  left: 24px;
+  top: 0;
+  bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  color: var(--ink);
+}
+
+.upload-btn svg {
+  width: 22px;
+  height: 22px;
+}
+
 .sheet-tabs {
   display: flex;
   gap: 8px;
@@ -1687,10 +1704,14 @@ input[type=number] {
   <div class="sheet-backdrop" id="expense-sheet-backdrop" onclick="closeExpenseSheetIfBackdrop(event)"></div>
   <div class="screen expense-sheet" id="screen-expense">
     <div class="screen-header sheet-header-centered">
+      <button class="upload-btn" id="upload-expenses-btn" onclick="document.getElementById('upload-expenses-file').click()" aria-label="Upload expenses">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></svg>
+      </button>
       <h1 class="h1" id="expense-title">Add</h1>
       <button class="close-btn" onclick="closeExpenseSheet()" aria-label="Close">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
       </button>
+      <input type="file" id="upload-expenses-file" accept=".csv,.txt" style="display:none" onchange="importUploadedExpenses(event)">
     </div>
 
     <div class="sheet-tabs" id="sheet-tabs">
@@ -2624,6 +2645,7 @@ function navigateHome() {
 function openAddExpense() {
   editingExpenseId = null;
   document.getElementById('sheet-tabs').style.display = 'flex';
+  document.getElementById('upload-expenses-btn').style.display = 'flex';
   document.getElementById('expense-title').textContent = 'Add';
   document.getElementById('expense-save').textContent = 'Add';
   document.getElementById('expense-delete').style.display = 'none';
@@ -2666,6 +2688,7 @@ function openEditExpense(id) {
   editingExpenseId = id;
   sheetTab = 'expense';
   document.getElementById('sheet-tabs').style.display = 'none';
+  document.getElementById('upload-expenses-btn').style.display = 'none';
   document.getElementById('expense-tab-expense').style.display = 'block';
   document.getElementById('expense-tab-income').style.display = 'none';
   document.getElementById('expense-title').textContent = 'Edit';
@@ -2922,6 +2945,83 @@ function saveExpense() {
   saveState();
   renderAll();
   closeExpenseSheet();
+}
+
+// ============ BULK EXPENSE UPLOAD ============
+// Adds expenses from a CSV/txt file instead of replacing existing data (unlike
+// Settings > Import data, which restores a full backup). Expected columns per
+// row: date,amount,note,source — date as DD.MM.YYYY or YYYY-MM-DD, amount a
+// plain positive number, source matched by name against your existing sources
+// (falls back to the first source if missing or unmatched). Category defaults
+// to "Other" — expected to be reassigned by hand afterward.
+
+function parseCsvLine(line) {
+  const out = [];
+  let cur = '';
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (inQuotes) {
+      if (c === '"' && line[i + 1] === '"') { cur += '"'; i++; }
+      else if (c === '"') { inQuotes = false; }
+      else { cur += c; }
+    } else {
+      if (c === '"') inQuotes = true;
+      else if (c === ',') { out.push(cur); cur = ''; }
+      else cur += c;
+    }
+  }
+  out.push(cur);
+  return out.map(s => s.trim());
+}
+
+function parseBankDate(raw) {
+  const s = (raw || '').trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+  const m = s.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
+  if (m) return `${m[3]}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}`;
+  return null;
+}
+
+function importUploadedExpenses(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const lines = e.target.result.split(/\r?\n/).filter(l => l.trim() !== '');
+    let added = 0;
+    let skipped = 0;
+    lines.forEach(line => {
+      const cols = parseCsvLine(line);
+      if (cols[0] && cols[0].toLowerCase() === 'date') return; // allow a header row
+      const [dateRaw, amountRaw, note, sourceName] = cols;
+      const date = parseBankDate(dateRaw);
+      const amount = parseAmount(amountRaw);
+      if (!date || isNaN(amount) || amount <= 0) { skipped++; return; }
+      let sourceId = state.sources[0]?.id || null;
+      if (sourceName) {
+        const match = state.sources.find(s => s.name.toLowerCase() === sourceName.trim().toLowerCase());
+        if (match) sourceId = match.id;
+      }
+      state.expenses.push({
+        id: uid('e'),
+        amount,
+        date,
+        categoryId: 'c-other',
+        subcategoryId: null,
+        sourceId,
+        intention: 'intentional',
+        impulseAmount: null,
+        note: note || '',
+      });
+      added++;
+    });
+    if (added > 0) { saveState(); renderAll(); }
+    toast(skipped > 0 ? `Imported ${added}, skipped ${skipped}` : `Imported ${added} expense${added === 1 ? '' : 's'}`);
+    if (added > 0) closeExpenseSheet();
+  };
+  reader.readAsText(file);
+  event.target.value = '';
 }
 
 function deleteExpense() {
