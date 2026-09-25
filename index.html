@@ -136,6 +136,7 @@ input::placeholder {
   position: relative;
   padding-bottom: env(safe-area-inset-bottom);
   background: transparent;
+  overflow-x: hidden;
 }
 
 .screen {
@@ -1394,6 +1395,7 @@ input::placeholder {
   width: calc(100% + 48px);
   padding: 0 24px 16px;
   margin-bottom: 16px;
+  position: relative;
 }
 
 .sheet-header-centered {
@@ -1403,6 +1405,23 @@ input::placeholder {
 .sheet-header-centered .h1 {
   flex: none;
   text-align: center;
+}
+
+.close-btn {
+  position: absolute;
+  right: 24px;
+  top: 0;
+  bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  color: var(--ink);
+}
+
+.close-btn svg {
+  width: 22px;
+  height: 22px;
 }
 
 .sheet-tabs {
@@ -1669,6 +1688,9 @@ input[type=number] {
   <div class="screen expense-sheet" id="screen-expense">
     <div class="screen-header sheet-header-centered">
       <h1 class="h1" id="expense-title">Add</h1>
+      <button class="close-btn" onclick="closeExpenseSheet()" aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
     </div>
 
     <div class="sheet-tabs" id="sheet-tabs">
