@@ -2083,6 +2083,9 @@ async function pushMyData() {
       expenses: state.expenses,
       categories: state.categories,
       sources: state.sources,
+      settings: state.settings,
+      bills: state.bills,
+      income: state.income,
       pushedAt: new Date().toISOString(),
     };
     await fetch(`${SYNC.api}/b/${SYNC.myBinId}`, {
