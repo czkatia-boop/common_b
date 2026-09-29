@@ -1766,6 +1766,18 @@ input[type=number] {
           </div>
         </div>
       </div>
+
+      <div class="field">
+        <button class="toggle-row" type="button" onclick="toggleExpenseCountsThisWeek()">
+          <span class="toggle-label">
+            <span style="font-weight:500">Count toward this week</span>
+            <span style="font-size:13px; color:var(--secondary); font-weight:400">Turn off for a big one-off cost — it still reduces your balance, just won't spike this week's number</span>
+          </span>
+          <span class="toggle on" id="expense-counts-visual">
+            <span class="toggle-knob"></span>
+          </span>
+        </button>
+      </div>
     </div>
 
     <div id="expense-tab-income" style="display:none">
@@ -2402,6 +2414,7 @@ function spentThisWeek(today = new Date()) {
   return state.expenses.reduce((sum, e) => {
     if (!sourceCountsInBudget(e.sourceId)) return sum;
     if (e.billId) return sum; // bills already deducted upfront in budget formula
+    if (e.countsThisWeek === false) return sum; // manually excluded from this week's pacing only — still counts toward the balance and future weeks
     const d = parseISO(e.date);
     if (d >= week.start && d <= week.end) {
       return sum + e.amount;
@@ -2665,6 +2678,7 @@ function openAddExpense() {
     subcategoryId: lastExpense?.subcategoryId || null,
     sourceId: lastExpense?.sourceId || state.sources[0]?.id || null,
     intention: 'intentional',
+    countsThisWeek: true, // always starts on — this is a per-expense call, not something to remember
   };
   expandedCategoryInForm = selectedExpense.subcategoryId ? selectedExpense.categoryId : null;
   const lastCatIdx = state.categories.findIndex(c => c.id === selectedExpense.categoryId);
@@ -2705,6 +2719,7 @@ function openEditExpense(id) {
     subcategoryId: exp.subcategoryId,
     sourceId: exp.sourceId,
     intention: exp.intention,
+    countsThisWeek: exp.countsThisWeek !== false,
   };
   expandedCategoryInForm = exp.subcategoryId ? exp.categoryId : null;
   // If selected category isn't in the first 5, auto-expand More
@@ -2730,6 +2745,7 @@ let selectedExpense = {
   subcategoryId: null,
   sourceId: null,
   intention: 'intentional',
+  countsThisWeek: true,
 };
 let selectedIncome = {
   sourceId: null,
@@ -2834,6 +2850,15 @@ function renderExpenseForm() {
   document.querySelectorAll('[data-intention]').forEach(b => {
     b.classList.toggle('selected', b.dataset.intention === selectedExpense.intention);
   });
+
+  // Count toward this week
+  const countsToggle = document.getElementById('expense-counts-visual');
+  if (countsToggle) countsToggle.classList.toggle('on', selectedExpense.countsThisWeek !== false);
+}
+
+function toggleExpenseCountsThisWeek() {
+  selectedExpense.countsThisWeek = selectedExpense.countsThisWeek === false;
+  renderExpenseForm();
 }
 
 function selectIntention(intention) {
@@ -2931,6 +2956,7 @@ function saveExpense() {
       exp.sourceId = selectedExpense.sourceId;
       exp.intention = selectedExpense.intention;
       exp.impulseAmount = impulseAmount;
+      exp.countsThisWeek = selectedExpense.countsThisWeek;
     }
   } else {
     state.expenses.push({
@@ -2942,6 +2968,7 @@ function saveExpense() {
       sourceId: selectedExpense.sourceId,
       intention: selectedExpense.intention,
       impulseAmount,
+      countsThisWeek: selectedExpense.countsThisWeek,
       note: '',
     });
   }
