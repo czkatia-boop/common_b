@@ -2310,7 +2310,11 @@ async function pushMyData() {
       },
       body: JSON.stringify(payload),
     });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    if (!res.ok) {
+      let msg = '';
+      try { msg = ((await res.json()).message || '').slice(0, 80); } catch (_) {}
+      throw new Error(`HTTP ${res.status}${msg ? ' — ' + msg : ''} (${Math.round(JSON.stringify(payload).length / 1024)} KB)`);
+    }
   } catch (e) {
     console.warn('Sync push failed:', e);
     toast('Sync failed: ' + e.message);
