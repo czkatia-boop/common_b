@@ -2302,6 +2302,19 @@ async function pushMyData() {
       income: state.income,
       pushedAt: new Date().toISOString(),
     };
+    // JSONBin's free plan rejects records over 100 KB — keep the newest expenses that fit
+    const LIMIT = 95 * 1024;
+    if (JSON.stringify(payload).length > LIMIT) {
+      const newest = [...state.expenses].sort((a, b) => String(b.date).localeCompare(String(a.date)));
+      let lo = 0, hi = newest.length;
+      while (lo < hi) {
+        const mid = Math.ceil((lo + hi) / 2);
+        if (JSON.stringify({ ...payload, expenses: newest.slice(0, mid) }).length <= LIMIT) lo = mid; else hi = mid - 1;
+      }
+      payload.expenses = newest.slice(0, lo);
+      payload.truncated = true;
+      toast(`Cloud holds only the newest ${lo} of ${newest.length} expenses (100 KB limit)`);
+    }
     const res = await fetch(`${SYNC.api}/b/${SYNC.myBinId}`, {
       method: 'PUT',
       headers: {
