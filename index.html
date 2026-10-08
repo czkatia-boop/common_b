@@ -2197,7 +2197,100 @@ function getDisplayCategory(catId) {
 
 // ============ JSONBIN SYNC ============
 
+// ---- Overwrite protection ----------------------------------------------
+// A device may only write to the cloud copy after it has checked what's there:
+//   cloud has a budget, this device doesn't  -> load the cloud budget instead
+//   cloud is empty, this device has data     -> trust this device and push
+//   both have data                           -> ask which one to keep
+//   neither has data                         -> do nothing
+// So a fresh browser holding only the starter data can never replace a real budget.
+const SYNC_TRUST_KEY = 'weekly-budget-sync-trusted-v1';
+let syncCheck = null; // in-flight check, shared by startup and saves
+
+function hasRealData(d) {
+  return !!d && ((d.expenses && d.expenses.length > 0) ||
+    (d.income && d.income.length > 0) ||
+    !!(d.settings && d.settings.monthlyIncome > 0));
+}
+
+function isSyncTrusted() {
+  try { return localStorage.getItem(SYNC_TRUST_KEY) === '1'; } catch (e) { return false; }
+}
+
+function setSyncTrusted() {
+  try { localStorage.setItem(SYNC_TRUST_KEY, '1'); } catch (e) {}
+}
+
+function adoptCloudData(r) {
+  state.settings = { ...state.settings, ...r.settings };
+  state.categories = r.categories || state.categories;
+  state.sources = (r.sources || state.sources).map(src =>
+    src.countInBudget === undefined ? { ...src, countInBudget: src.id !== 's-partner' } : src);
+  state.bills = r.bills || state.bills;
+  state.expenses = r.expenses || [];
+  state.income = r.income || [];
+  saveState(true); // local only — don't push what we just pulled
+  setSyncTrusted();
+}
+
+function openSyncConflictModal(record) {
+  const when = record.pushedAt ? new Date(record.pushedAt).toLocaleString() : 'earlier';
+  openModal(`
+    <h3>Which budget to keep?</h3>
+    <p style="color:var(--secondary); margin-bottom:24px">The cloud already has a budget (${(record.expenses || []).length} expenses, saved ${when}) and this device has a different one (${state.expenses.length} expenses). Nothing is saved to the cloud until you choose.</p>
+    <div class="btn-stack" style="margin-top:0">
+      <button class="btn btn-primary" id="sync-use-cloud">Use the cloud budget</button>
+      <button class="btn btn-secondary" id="sync-keep-device">Keep this device's budget (replaces cloud)</button>
+    </div>
+  `);
+  document.getElementById('sync-use-cloud').onclick = () => {
+    adoptCloudData(record);
+    closeModal();
+    toast('Loaded your budget from the cloud');
+    renderAll();
+  };
+  document.getElementById('sync-keep-device').onclick = () => {
+    setSyncTrusted();
+    closeModal();
+    saveState();
+  };
+}
+
+async function checkCloudBeforePush() {
+  let record;
+  try {
+    const res = await fetch(`${SYNC.api}/b/${SYNC.myBinId}/latest`, {
+      headers: { 'X-Access-Key': SYNC.accessKey },
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    record = (await res.json()).record;
+  } catch (e) {
+    console.warn('Could not check the cloud copy — not pushing:', e);
+    return false;
+  }
+  const cloudHas = hasRealData(record);
+  const localHas = hasRealData(state);
+  if (!cloudHas && !localHas) return false;
+  if (!cloudHas) { setSyncTrusted(); return true; }
+  if (!localHas) {
+    adoptCloudData(record);
+    toast('Loaded your budget from the cloud');
+    renderAll();
+    return false;
+  }
+  openSyncConflictModal(record);
+  return false;
+}
+
+// Resolves true when this device is allowed to push.
+function canPushToCloud() {
+  if (isSyncTrusted()) return Promise.resolve(true);
+  if (!syncCheck) syncCheck = checkCloudBeforePush().finally(() => { syncCheck = null; });
+  return syncCheck;
+}
+
 async function pushMyData() {
+  if (!(await canPushToCloud())) return;
   try {
     const payload = {
       expenses: state.expenses,
@@ -2310,7 +2403,7 @@ function loadState() {
   }
 }
 
-function saveState() {
+function saveState(skipPush) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
       settings: state.settings,
@@ -2320,8 +2413,8 @@ function saveState() {
       expenses: state.expenses,
       income: state.income,
     }));
-    // Push to JSONBin silently
-    pushMyData();
+    // Push to JSONBin silently (guarded — see "Overwrite protection")
+    if (skipPush !== true) pushMyData();
   } catch (e) {
     console.error('Failed to save state', e);
   }
