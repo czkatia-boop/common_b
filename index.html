@@ -2266,6 +2266,7 @@ async function checkCloudBeforePush() {
     record = (await res.json()).record;
   } catch (e) {
     console.warn('Could not check the cloud copy — not pushing:', e);
+    toast('Sync: cloud check failed (' + e.message + ') — not saved to cloud');
     return false;
   }
   const cloudHas = hasRealData(record);
@@ -2301,7 +2302,7 @@ async function pushMyData() {
       income: state.income,
       pushedAt: new Date().toISOString(),
     };
-    await fetch(`${SYNC.api}/b/${SYNC.myBinId}`, {
+    const res = await fetch(`${SYNC.api}/b/${SYNC.myBinId}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -2309,8 +2310,10 @@ async function pushMyData() {
       },
       body: JSON.stringify(payload),
     });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
   } catch (e) {
-    console.warn('Sync push failed (silent):', e);
+    console.warn('Sync push failed:', e);
+    toast('Sync failed: ' + e.message);
   }
 }
 
