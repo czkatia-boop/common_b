@@ -4468,8 +4468,9 @@ function exportData() {
     sources: state.sources,
     bills: state.bills,
     expenses: state.expenses,
+    income: state.income,
     exportedAt: new Date().toISOString(),
-    version: 1,
+    version: 2,
   };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
@@ -4491,15 +4492,25 @@ function importData(event) {
   reader.onload = (e) => {
     try {
       const data = JSON.parse(e.target.result);
+      const looksLikeBudget = data && typeof data === 'object' && (Array.isArray(data.expenses) || data.settings);
+      if (!looksLikeBudget) { toast("This file doesn't look like a budget backup"); return; }
+      // Never let an empty backup wipe a real budget
+      const hasData = (data.expenses && data.expenses.length > 0) ||
+        (data.income && data.income.length > 0) ||
+        !!(data.settings && data.settings.monthlyIncome > 0);
+      if (!hasData) { toast('This backup is empty — nothing imported'); return; }
+      const hasIncome = Array.isArray(data.income);
       openConfirmModal(
         'Import this backup?',
-        'Your current data will be replaced with the data from this file. Make sure you have a recent export if you want to keep what\'s currently in the app.',
+        'Your current data will be replaced with the data from this file. Make sure you have a recent export if you want to keep what\'s currently in the app.' +
+          (hasIncome ? '' : ' This is an older backup without one-off income entries, so the ones you have now are kept.'),
         () => {
           if (data.settings) state.settings = { ...state.settings, ...data.settings };
           if (data.categories) state.categories = data.categories;
           if (data.sources) state.sources = data.sources;
           if (data.bills) state.bills = data.bills;
           if (data.expenses) state.expenses = data.expenses;
+          if (hasIncome) state.income = data.income;
           saveState();
           renderAll();
           toast('Imported');
