@@ -1971,7 +1971,7 @@ const PARTNER_STORAGE_KEY = 'weekly-budget-partner-v1';
 
 // ============ SYNC CONFIG ============
 const SYNC = {
-  masterKey: '$2a$10$1kSbh8taCxK4hCbRzCTeau9i.KkStRsyk0Gb8eZkxXClnDcVdHUDe',
+  accessKey: '$2a$10$3TT/pZXT/iPfUh23wRDPxO.Zc0RZbkMFLRCuBl.wb4eHu2Q538gIO', // JSONBin Access Key (read + update only)
   myBinId: '6a0f08a86877513b27ac3f75',
   partnerBinId: '6a0f0810ee5a733b12f77362',
   api: 'https://api.jsonbin.io/v3',
@@ -2068,7 +2068,7 @@ async function pushMyData() {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        'X-Master-Key': SYNC.masterKey,
+        'X-Access-Key': SYNC.accessKey,
       },
       body: JSON.stringify(payload),
     });
@@ -2089,7 +2089,7 @@ async function pushPartnerData() {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        'X-Master-Key': SYNC.masterKey,
+        'X-Access-Key': SYNC.accessKey,
       },
       body: JSON.stringify(payload),
     });
@@ -2101,7 +2101,7 @@ async function pushPartnerData() {
 async function pullPartnerData() {
   try {
     const res = await fetch(`${SYNC.api}/b/${SYNC.partnerBinId}/latest`, {
-      headers: { 'X-Master-Key': SYNC.masterKey },
+      headers: { 'X-Access-Key': SYNC.accessKey },
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
