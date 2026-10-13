@@ -1971,7 +1971,7 @@ const PARTNER_STORAGE_KEY = 'weekly-budget-partner-v1';
 
 // ============ SYNC CONFIG ============
 const SYNC = {
-  masterKey: '$2a$10$1kSbh8taCxK4hCbRzCTeau9i.KkStRsyk0Gb8eZkxXClnDcVdHUDe',
+  accessKey: '$2a$10$3TT/pZXT/iPfUh23wRDPxO.Zc0RZbkMFLRCuBl.wb4eHu2Q538gIO', // JSONBin Access Key (read + update only)
   myBinId: '6a0f08a86877513b27ac3f75',
   partnerBinId: '6a0f0810ee5a733b12f77362',
   api: 'https://api.jsonbin.io/v3',
@@ -2056,7 +2056,96 @@ function getDisplayCategory(catId) {
 
 // ============ JSONBIN SYNC ============
 
+// ---- Overwrite protection ----------------------------------------------
+// A device may only write to the cloud copy after it has checked what's there:
+//   cloud has a budget, this device doesn't  -> load the cloud budget instead
+//   cloud is empty, this device has data     -> trust this device and push
+//   both have data                           -> ask which one to keep
+//   neither has data                         -> do nothing
+// So a fresh browser holding only the starter data can never replace a real budget.
+const SYNC_TRUST_KEY = 'weekly-budget-sync-trusted-v1';
+let syncCheck = null; // in-flight check, shared by startup and saves
+
+function hasRealData(d) {
+  // Bills this page logs by itself on a fresh load don't count as real data
+  return !!d && !!d.expenses && d.expenses.some(e => !e.billId);
+}
+
+function isSyncTrusted() {
+  try { return localStorage.getItem(SYNC_TRUST_KEY) === '1'; } catch (e) { return false; }
+}
+
+function setSyncTrusted() {
+  try { localStorage.setItem(SYNC_TRUST_KEY, '1'); } catch (e) {}
+}
+
+function adoptCloudData(r) {
+  state.categories = r.categories || state.categories;
+  state.sources = (r.sources || state.sources).map(src =>
+    src.countInBudget === undefined ? { ...src, countInBudget: src.id !== 's-partner' } : src);
+  state.expenses = r.expenses || [];
+  saveState(true); // local only — don't push what we just pulled
+  setSyncTrusted();
+}
+
+function openSyncConflictModal(record) {
+  const when = record.pushedAt ? new Date(record.pushedAt).toLocaleString() : 'earlier';
+  openModal(`
+    <h3>Which budget to keep?</h3>
+    <p style="color:var(--secondary); margin-bottom:24px">The cloud already has a budget (${(record.expenses || []).length} expenses, saved ${when}) and this device has a different one (${state.expenses.length} expenses). Nothing is saved to the cloud until you choose.</p>
+    <div class="btn-stack" style="margin-top:0">
+      <button class="btn btn-primary" id="sync-use-cloud">Use the cloud budget</button>
+      <button class="btn btn-secondary" id="sync-keep-device">Keep this device's budget (replaces cloud)</button>
+    </div>
+  `);
+  document.getElementById('sync-use-cloud').onclick = () => {
+    adoptCloudData(record);
+    closeModal();
+    toast('Loaded your budget from the cloud');
+    renderAll();
+  };
+  document.getElementById('sync-keep-device').onclick = () => {
+    setSyncTrusted();
+    closeModal();
+    saveState();
+  };
+}
+
+async function checkCloudBeforePush() {
+  let record;
+  try {
+    const res = await fetch(`${SYNC.api}/b/${SYNC.myBinId}/latest`, {
+      headers: { 'X-Access-Key': SYNC.accessKey },
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    record = (await res.json()).record;
+  } catch (e) {
+    console.warn('Could not check the cloud copy — not pushing:', e);
+    return false;
+  }
+  const cloudHas = hasRealData(record);
+  const localHas = hasRealData(state);
+  if (!cloudHas && !localHas) return false;
+  if (!cloudHas) { setSyncTrusted(); return true; }
+  if (!localHas) {
+    adoptCloudData(record);
+    toast('Loaded your budget from the cloud');
+    renderAll();
+    return false;
+  }
+  openSyncConflictModal(record);
+  return false;
+}
+
+// Resolves true when this device is allowed to push.
+function canPushToCloud() {
+  if (isSyncTrusted()) return Promise.resolve(true);
+  if (!syncCheck) syncCheck = checkCloudBeforePush().finally(() => { syncCheck = null; });
+  return syncCheck;
+}
+
 async function pushMyData() {
+  if (!(await canPushToCloud())) return;
   try {
     const payload = {
       expenses: state.expenses,
@@ -2068,7 +2157,7 @@ async function pushMyData() {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        'X-Master-Key': SYNC.masterKey,
+        'X-Access-Key': SYNC.accessKey,
       },
       body: JSON.stringify(payload),
     });
@@ -2089,7 +2178,7 @@ async function pushPartnerData() {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        'X-Master-Key': SYNC.masterKey,
+        'X-Access-Key': SYNC.accessKey,
       },
       body: JSON.stringify(payload),
     });
@@ -2101,7 +2190,7 @@ async function pushPartnerData() {
 async function pullPartnerData() {
   try {
     const res = await fetch(`${SYNC.api}/b/${SYNC.partnerBinId}/latest`, {
-      headers: { 'X-Master-Key': SYNC.masterKey },
+      headers: { 'X-Access-Key': SYNC.accessKey },
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
@@ -2166,7 +2255,7 @@ function loadState() {
   }
 }
 
-function saveState() {
+function saveState(skipPush) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
       settings: state.settings,
@@ -2177,7 +2266,7 @@ function saveState() {
       income: state.income,
     }));
     // Push to JSONBin silently
-    pushMyData();
+    if (skipPush !== true) pushMyData();
   } catch (e) {
     console.error('Failed to save state', e);
   }
@@ -4156,8 +4245,9 @@ function exportData() {
     sources: state.sources,
     bills: state.bills,
     expenses: state.expenses,
+    income: state.income,
     exportedAt: new Date().toISOString(),
-    version: 1,
+    version: 2,
   };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
@@ -4179,15 +4269,25 @@ function importData(event) {
   reader.onload = (e) => {
     try {
       const data = JSON.parse(e.target.result);
+      const looksLikeBudget = data && typeof data === 'object' && (Array.isArray(data.expenses) || data.settings);
+      if (!looksLikeBudget) { toast("This file doesn't look like a budget backup"); return; }
+      // Never let an empty backup wipe a real budget
+      const hasData = (data.expenses && data.expenses.length > 0) ||
+        (data.income && data.income.length > 0) ||
+        !!(data.settings && data.settings.monthlyIncome > 0);
+      if (!hasData) { toast('This backup is empty — nothing imported'); return; }
+      const hasIncome = Array.isArray(data.income);
       openConfirmModal(
         'Import this backup?',
-        'Your current data will be replaced with the data from this file. Make sure you have a recent export if you want to keep what\'s currently in the app.',
+        'Your current data will be replaced with the data from this file. Make sure you have a recent export if you want to keep what\'s currently in the app.' +
+          (hasIncome ? '' : ' This is an older backup without one-off income entries, so the ones you have now are kept.'),
         () => {
           if (data.settings) state.settings = { ...state.settings, ...data.settings };
           if (data.categories) state.categories = data.categories;
           if (data.sources) state.sources = data.sources;
           if (data.bills) state.bills = data.bills;
           if (data.expenses) state.expenses = data.expenses;
+          if (hasIncome) state.income = data.income;
           saveState();
           renderAll();
           toast('Imported');
