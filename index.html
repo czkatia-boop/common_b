@@ -1878,7 +1878,7 @@ input[type=number] {
         <button class="toggle-row" type="button" onclick="toggleExpenseCountsThisWeek()">
           <span class="toggle-label">
             <span style="font-weight:500">Count toward this week</span>
-            <span style="font-size:13px; color:var(--secondary); font-weight:400">Turn off for a big one-off cost — it still reduces your balance, just won't spike this week's number</span>
+            <span style="font-size:13px; color:var(--secondary); font-weight:400">Turn off for a bill or stash-funded cost — treated like a Fixed Bill: doesn't reduce your balance or any week's budget</span>
           </span>
           <span class="toggle on" id="expense-counts-visual">
             <span class="toggle-knob"></span>
@@ -2635,7 +2635,7 @@ function spentThisWeek(today = new Date()) {
   return state.expenses.reduce((sum, e) => {
     if (!sourceCountsInBudget(e.sourceId)) return sum;
     if (e.billId) return sum; // bills already deducted upfront in budget formula
-    if (e.countsThisWeek === false) return sum; // manually excluded from this week's pacing only — still counts toward the balance and future weeks
+    if (e.countsThisWeek === false) return sum; // manually excluded — treated like a fixed bill (stash money or a bill paid outside the Bills list)
     const d = parseISO(e.date);
     if (d >= week.start && d <= week.end) {
       return sum + e.amount;
@@ -2700,6 +2700,7 @@ function spentInCycleBeforeThisWeek(today = new Date()) {
   return state.expenses.reduce((sum, e) => {
     if (!sourceCountsInBudget(e.sourceId)) return sum;
     if (e.billId) return sum; // bills already deducted upfront in budget formula
+    if (e.countsThisWeek === false) return sum; // treated like a fixed bill — excluded everywhere
     const d = parseISO(e.date);
     if (d >= cycle.start && d < week.start) {
       return sum + e.amount;
@@ -2727,6 +2728,7 @@ function cycleCarryover(today = new Date()) {
     const spent = state.expenses.reduce((s, e) => {
       if (!sourceCountsInBudget(e.sourceId)) return s;
       if (e.billId) return s; // bills already deducted upfront
+      if (e.countsThisWeek === false) return s; // treated like a fixed bill — excluded everywhere
       const d = parseISO(e.date);
       if (d >= windowStart && d <= wEnd) return s + e.amount;
       return s;
@@ -2763,6 +2765,7 @@ function currentBalance(today = new Date()) {
   const spentThisCycleOwn = state.expenses.reduce((sum, e) => {
     if (!sourceCountsInBudget(e.sourceId)) return sum;
     if (e.billId) return sum; // bills already deducted via totalFixedBills()
+    if (e.countsThisWeek === false) return sum; // treated like a fixed bill — excluded everywhere
     const d = parseISO(e.date);
     if (d >= cycle.start && d <= cycle.end) return sum + e.amount;
     return sum;
