@@ -2493,18 +2493,21 @@ function cycleCarryover(today = new Date()) {
   const target = state.settings.weeklyBudgetOverride;
   const cycle = getCurrentCycle(today);
   const thisWeek = getCurrentWeek(today);
-  // Find each completed week in the cycle before this one, and accumulate (target - spent)
+  // Find each completed week in the cycle before this one, and accumulate (target - spent).
+  // Walk to the Monday of the week containing the cycle start (which may be before
+  // cycle.start if the cycle doesn't begin on a Monday) so a short first week still
+  // gets counted instead of being skipped — it still gets the full weekly target.
   let carry = 0;
   let cursor = startOfDay(cycle.start);
-  // Walk to first Monday in cycle
-  while (cursor.getDay() !== 1) cursor = addDays(cursor, 1);
+  while (cursor.getDay() !== 1) cursor = addDays(cursor, -1);
   while (cursor < thisWeek.start) {
     const wEnd = addDays(cursor, 6);
+    const windowStart = cursor < cycle.start ? cycle.start : cursor;
     const spent = state.expenses.reduce((s, e) => {
       if (!sourceCountsInBudget(e.sourceId)) return s;
       if (e.billId) return s; // bills already deducted upfront
       const d = parseISO(e.date);
-      if (d >= cursor && d <= wEnd) return s + e.amount;
+      if (d >= windowStart && d <= wEnd) return s + e.amount;
       return s;
     }, 0);
     carry += (target - spent);
